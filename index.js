@@ -22,7 +22,24 @@ module.exports = function (browserify, options) {
             }, function (next) {
                 var index = code.indexOf(SEARCH_KEY);
                 var sourcemap = code.substr(index);
-                var json = convert.fromComment(sourcemap).toJSON(2);
+                var mapConverter = convert.fromComment(sourcemap);
+
+                if (options.sourceRoot) {
+                    mapConverter.setProperty('sourceRoot', options.sourceRoot);
+                }
+                if (options.sourcesBase) {
+                    mapConverter.setProperty('sources', mapConverter.getProperty('sources').map(function map(file) {
+                        return path.relative(options.sourcesBase, file);
+                    }));
+                } else if (options.sourcesMap) {
+                    mapConverter.setProperty('sources', mapConverter.getProperty('sources').map(options.sourcesMap));
+                } else {
+                    mapConverter.setProperty('sources', mapConverter.getProperty('sources').map(function (sourceFile) {
+                        return path.relative(path.basename(map), sourceFile).replace(/\\/g, '/'); // Don't make Windows-dependent
+                    }));
+                }
+
+                var json = mapConverter.toJSON(2);
                 fs.writeFileSync(map, json);
                 code = code.substr(0, index) + SEARCH_KEY + path.basename(map);
 
