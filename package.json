@@ -1,6 +1,6 @@
 {
   "name": "mapstraction",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Browserify plugin to extract sourcemaps",
   "main": "index.js",
   "scripts": {
